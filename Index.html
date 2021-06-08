@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+<head>
+    <meta charset="utf-8" />
+    <title>财富分配实验</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts-nightly@5.1.2-dev.20210512/dist/echarts.min.js"></script>
+</head>
+<body style="height: 100%; margin: 0">
+    <div>
+
+        <label>人数：</label> <input id="count" value="100" />
+
+        <label>初始财富：</label> <input id="totals" value="10" />
+
+        <label>天数：</label> <input id="days" value="1000" />
+
+
+        <button onclick="go()">开始模拟</button>
+        <button onclick="clearInterval(timer)">停止模拟</button>
+        当前第<span id="currDay">0</span>天
+    </div>
+
+    <div id="container" style="height: 100%"></div>
+
+</body>
+</html>
+<script type="text/javascript">
+    var dom = document.getElementById("container");
+    var myChart = echarts.init(dom);
+    var option = {
+        xAxis: {
+            type: 'category',
+            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [{
+            data: [120, 200, 150, 80, 70, 110, 130],
+            type: 'bar'
+        }]
+    };
+
+    var timer;
+    var persons = [];
+    var currentDay = 0;
+
+    function go() {
+
+        persons = [];
+        currentDay = 0;
+        if (count.value < 10) {
+            alert("最少10个人")
+            return;
+        }
+        if (totals.value < 10) {
+            alert("初始财富最少10块钱")
+            return;
+        }
+        if (days.value < 100) {
+            alert("最少100天")
+            return;
+        }
+
+
+        for (var i = 1; i <= count.value; i++) {
+            persons.push({
+                name: '人' + i,
+                money: totals.value
+            });
+        }
+
+        option.xAxis.data = persons.map(p => p.name);
+        option.series[0].data = persons.map(p => p.money + i);
+        myChart.setOption(option);
+
+        setTimeout(function () {
+            timer = setInterval(function () {
+
+                for (var i in persons) {
+                    var person = persons[i];
+                    var person2 = getRandomPerson();
+                    while (person == person2) {
+                        person2 = getRandomPerson();
+                    }
+                    person.money--;
+                    person2.money++;
+                }
+                if (currentDay % 10 == 0) {
+                    option.series[0].data = persons.map(p => p.money);
+                    myChart.setOption(option);
+                }
+
+                if (currentDay >= days.value) {
+                    alert("模拟结束")
+                    clearInterval(timer);
+                } else {
+                    currentDay++;
+                    currDay.innerHTML = currentDay;
+                }
+            }, 20);
+        }, 1000);
+
+
+    }
+
+    function getRandomPerson() {
+        return persons[Math.floor(Math.random() * persons.length)];
+    }
+
+</script>
